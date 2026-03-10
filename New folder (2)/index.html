@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Baby Vision</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #slideshow-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #slideshow-btn:hover {
+            background-color: #0056b3;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .gallery img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+    .gallery img:hover {
+            transform: scale(1.05);
+        }
+        /* Lightbox styles */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+        }
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        .lightbox .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .lightbox .prev, .lightbox .next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+        .lightbox .prev { left: 20px; }
+        .lightbox .next { right: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Project Baby Vision</h1>
+    <button id="slideshow-btn">Start Slideshow</button>
+    <div class="gallery">
+        <!-- Images will be inserted here -->
+    </div>
+
+    <!-- Lightbox modal -->
+    <div id="lightbox" class="lightbox">
+        <span class="close">&times;</span>
+        <span class="prev">&#10094;</span>
+        <img id="lightbox-img" src="" alt="">
+        <span class="next">&#10095;</span>
+    </div>
+
+    <script>
+        // Dynamically load images from the images folder
+        const gallery = document.querySelector('.gallery');
+        const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
+
+        // For demonstration, list some images. In a real scenario, you might fetch from server.
+        const images = [
+            '026, 02_07_46 AM.png',
+            '1ffaad1a-e545-4d33-8c4a-e0a432249f95.png',
+            '20250627_0635_3D Cartoon Heart_remix_01jyqy0txne4qv0zkce0zj0wq6.png',
+            '20250627_0635_3D Cartoon Heart_remix_01jyqy0txpevaraedr0t28mhhc.png',
+            '22f38049-9b43-40ad-b44f-38afab9ba595.png',
+            '3b7f281d-6cc1-43a4-9647-f73e82861e1f.png',
+            '46232606-6953-49c0-8087-d278d6f410bf.png',
+            '4671fc18-663a-48b2-876d-bb7aac9de7f4.jpg',
+            '478585c1-8b6d-473a-856f-070a30acb780.png',
+            '5778128097721913477_121.jpg',
+            '5778128097721913479_121.jpg',
+            '61cbd7dc-e9c8-4181-83d4-d1ba6629e27b.png',
+            '656ec830-4d21-47da-88dd-e99143dd83fa.png',
+            '668da627-178b-4753-8d35-4ee05ba13a11.png',
+            '6a32483c-39bf-4022-9c14-ff0001f66a13.png',
+            '6bd5abf0-b6ed-4bc4-89d0-083ae0a13822.png',
+            '6f6cad35-74ed-4a82-946a-3a81f1fee58f.webp',
+            '700e8628-6697-4b69-a069-b0304fd3791e.png',
+            '7930ac5b-9479-4485-94ca-fd68a18dbf6a.png',
+            '8eec44f3-a65b-43d0-95d6-8667ea3b3a39.png',
+'93f746f5-4e4f-4c52-89b2-29b25611de71.png',
+'a850a7bc-262c-47d5-be8a-9fa53d376083.webp',
+'ai.png',
+'Artboard 10.png',
+'Artboard 2.png',
+'Artboard 3.png',
+'Artboard 4.png',
+'Artboard 6.png',
+'Artboard 7.png',
+'Artboard 8.png',
+'Artboard 9.png',
+'b anner3.png',
+'banner stylish.png',
+'banner.png',
+'c015197b-5cc9-41be-8309-024093514453.png',
+'c47e2763-fe37-42d3-993d-aa89eed40ac4.png',
+'ChatGPT Image Apr 23, 2025, 02_31_11 PM.png',
+'ChatGPT Image Apr 23, 2025, 06_08_49 AM.png',
+'ChatGPT Image Apr 23, 2025, 06_08_50 AM.png',
+'ChatGPT Image Apr 23, 2025, 06_12_29 AM.png',
+'ChatGPT Image Apr 23, 2025, 06_15_25 AM.png',
+'ChatGPT Image Apr 25, 2025, 09_22_58 PM.png',
+'ChatGPT Image Apr 26, 2025, 04_03_01 PM.png',
+'ChatGPT Image Apr 26, 2025, 04_16_22 PM.png',
+'ChatGPT Image Apr 26, 2025, 09_41_50 AM.png',
+'ChatGPT Image Aug 25, 2025, 12_45_11 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_45_13 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_45_23 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_45_24 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_45_31 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_45_35 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_45_42 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_45_45 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_45_49 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_45_50 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_46_04 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_46_08 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_46_12 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_46_16 PM.png',
+'ChatGPT Image Aug 25, 2025, 12_46_31 PM.png',
+'ChatGPT Image Feb 7, 2026, 02_08_04 AM.png',
+'ChatGPT Image Feb 7, 2026, 12_34_11 AM.png',
+'ChatGPT Image Feb 7, 2026, 12_34_17 AM.png',
+'ChatGPT Image Feb 8, 2026, 10_43_44 PM.png',
+'ChatGPT Image Feb 8, 2026, 10_49_56 PM.png',
+'ChatGPT Image Jul 2, 2025, 06_07_05 AM.png',
+'ChatGPT Image Jul 2, 2025, 06_07_06 AM.png',
+'ChatGPT Image Jul 3, 2025, 03_20_09 PM.png',
+'ChatGPT Image Jun 30, 2025, 11_05_49 AM.png',
+'ChatGPT Image Jun 30, 2025, 12_20_57 PM.png',
+'ChatGPT Image Jun 30, 2025, 12_22_01 PM.png',
+'ChatGPT Image Jun 30, 2025, 12_23_48 PM.png',
+'ChatGPT Image May 15, 2025, 10_33_58 PM.png',
+'ChatGPT Image May 15, 2025, 10_37_18 PM.png',
+'ChatGPT Image May 17, 2025, 11_00_47 AM.png',
+'ChatGPT Image May 17, 2025, 11_01_04 AM.png',
+'ChatGPT Image May 17, 2025, 11_01_25 AM.png',
+'ChatGPT Image May 17, 2025, 11_31_06 AM.png',
+'ChatGPT Image Nov 5, 2025, 01_40_08 AM.png',
+'ChatGPT Image Sep 5, 2025, 11_57_23 AM.png',
+'Chill Heart on Cloud.png',
+'Cloudside Chill with Heart and Tequila.png',
+'crypto usdt.png',
+'CURRENT LOGO.svg',
+'custom_flags_banner.png',
+'custom_flags_banner.svg',
+'d1167194-5d34-47aa-8347-548e0dd30282.png',
+'d14cb628-faa6-446c-9248-58b83561896b.png',
+'d458f216-a378-4451-8c1a-8867b07ddc17.png',
+'DALL·E 2025-02-05 07.41.40 - A cartoon-style anthropomorphic red heart character in a different pose. The character has expressive eyebrows, a mischievous grin, and boxing gloves.webp',
+'DALL·E 2025-02-26 20.44.12 - A cartoon heart character with a mischievous and extremely high expression, about to enter a recording studio session. The heart has bold black eyebro.webp',
+'DALL·E 2025-02-26 20.44.12 - A cartoon heart character with a mischievous and extremely high expression.png',
+'DALL·E 2025-02-26 20.44.27 - A cartoon heart character with a mischievous expression floating on a fluffy white cloud. The heart has bold black eyebrows, a confident smirk, and ex.webp',
+'DALL·E 2025-02-27 06.01.43 - A cartoon heart character inspired by 6ix9ine\'s style, with a wild and energetic expression. The heart has bold black eyebrows, rainbow-colored hair, .webp',
+'DALL·E 2025-02-27 06.01.47 - A cartoon heart character dressed as a legendary pop star, with a confident and electrifying stage presence. The heart has bold black eyebrows, expres.webp',
+'DALL·E 2025-02-27 06.01.55 - A cartoon heart character inspired by Kodak Black\'s style, with a mischievous and confident expression. The heart has bold black eyebrows, a smirk, an.webp',
+'DALL·E 2025-02-27 06.03.32 - A cartoon heart character passionately protesting against drug abuse. The heart has a determined and serious expression, with bold black eyebrows and .webp',
+'DALL·E 2025-02-27 06.03.32 - A cartoon heart character passionately protesting against drug abuse. The heart has a determined and serious expression, with bold black eyebrows and.png',
+'DALL·E 2025-02-27 17.41.14 - A 3D anthropomorphic soccer-themed signpost performing a football skill with glowing effects. The signpost has a playful, cartoonish design similar to.webp',
+'DALL·E 2025-02-27 17.41.20 - A 3D anthropomorphic soccer-themed signpost performing a football skill. The signpost has a playful, cartoonish design similar to a heart character, w.webp',
+'DALL·E 2025-02-27 17.41.28 - A 3D soccer-themed signpost with a playful, anthropomorphic design, similar to a cartoon heart character. The signpost has expressive eyes, bold eyebr.webp',
+'DALL·E 2025-02-27 17.41.50 - A cartoon heart character leading a protest against drug abuse. The heart has a determined and serious expression, with bold black eyebrows and focuse.webp',
+'DALL·E 2025-02-27 17.41.56 - A cartoon heart character passionately protesting against drug abuse. The heart has a determined and serious expression, with bold black eyebrows and .webp',
+'DALL·E 2025-03-04 08.36.29 - A professional and stylish logo for \'PROJECT BABY RECORDS\' incorporating a cartoon-style anthropomorphic heart character. The heart character is a dee.webp',
+'DALL·E 2025-03-04 08.40.18 - A professional and stylish logo for \'PROJECT BABY RECORDS\' featuring a cartoon-style anthropomorphic heart character. The heart character is a bright .webp',
+'dcbfd62a-3304-43bf-9d3b-b4a23959f78d.png',
+'e9379aa6-6689-4638-82d3-4a18049a5e54.png',
+'eyes,.webp',
+'Galaxy-S21-Ultra-notrobridge.com.png',
+'GAMINGG.png',
+'ggg.webp',
+'gsr.jpg',
+'HER.png',
+'huntabill.png',
+'image_2025-04-25_21-08-55.jpg',
+'IMG-20250201-WA0003.jpg',
+'IMG-20250201-WA0004.jpg',
+'IMG-20250201-WA0005.jpg',
+'IMG-20250201-WA0006.jpg',
+'IMG-20250201-WA0007.jpg',
+'IMG-20250423-WA0010.jpg',
+'IMG-20250423-WA0011.jpg',
+'IMG-20250423-WA0012.jpg',
+'IMG-20250423-WA0013.jpg',
+'IMG-20250423-WA0014.jpg',
+'IMG-20250423-WA0015.jpg',
+'IMG-20250423-WA0016.jpg',
+'IMG-20250423-WA0017.jpg',
+'IMG-20250423-WA0018.jpg',
+'IMG-20250423-WA0019.jpg',
+'IMG-20250423-WA0120.jpg',
+'IMG-20250423-WA0121.jpg',
+'IMG-20250423-WA0122.jpg',
+'IMG-20250423-WA0123.jpg',
+'IMG-20250624-WA0060.jpg',
+'img5 (2).webp',
+'img6 (1).webp',
+'img7 (1).webp',
+'instasave.website_541554149_18337399087202942_3206581013757602741_n.jpg',
+'is a bri.webp',
+'K (150 x 150 px) pjb2.svg',
+'K (52 x 52 px) pjb.svg',
+'KAAIA.png',
+'kaia.png',
+'ktb-b.webp',
+'logo-v2.png',
+'mona-lisa-facts-.jpg',
+'mona-lisa-facts-6.jpg',
+'mona-lisa-louvre.jpg',
+'mum.jpg',
+'n.jpeg',
+'nop.png',
+'not46.png',
+'Overthinking is something we humans do often we can\'t help it but all we have to do is just try .jpg',
+'passport_resized_1500x1000.jpg',
+'passport_resized_1500x1000.png',
+'PB AI.webp',
+'pb logo web.svg',
+'PB V.png',
+'photo_2025-05-17_09-51-11.jpg',
+'photo_2025-06-28_02-26-14.jpg',
+'photo_2025-07-06_11-39-46.jpg',
+'preda.png',
+'PROJECT BABY VISION.png',
+'PROJECT VIS.png',
+'project visions.png',
+'Project_Baby_Vision_1024x640.jpeg',
+'Project_Baby_Vision_Animated_Loop.gif',
+'Project_Baby_Vision_Gaming.jpeg',
+'Project_Baby_Vision_Unique_Gaming.gif',
+'project_baby_vision_vector.svg',
+'resized_100kb.jpg',
+'Screenshot 2023-04-08 103542.png',
+'Screenshot 2025-03-05 142317.png',
+'Screenshot 2025-05-20 091303.png',
+'Screenshot 2025-05-20 091327.png',
+'Screenshot 2025-08-21 022515.png',
+'Screenshot 2025-10-22 190830.png',
+'Screenshot_16-10-2025_24124_www.instagram.com.jpeg',
+'Screenshot_20251022-162512_Settings.jpg',
+'too_much_cock_for_her_tiny_body_00-53.png',
+'unnamed.png',
+'Untitled banner.png',
+'Untitled design  tgyhj.png',
+'Untitled design.png',
+'VISION TRANS.png',
+'WhatsApp Image 2025-03-21 at 22.55.19_6fd1ecc4.jpg',
+'WhatsApp Image 2025-04-23 at 19.15.38_8eade058.jpg',
+'WhatsApp Image 2025-04-23 at 19.15.38_a9c1526c.jpg',
+'WhatsApp Image 2025-04-23 at 19.19.27_b77b792b.jpg',
+'yak, a smirk, an.webp'
+        ];
+
+        images.forEach((img, index) => {
+            const imgElement = document.createElement('img');
+            imgElement.src = `images/${img}`;
+            imgElement.alt = img;
+            imgElement.addEventListener('click', () => openLightbox(index));
+            gallery.appendChild(imgElement);
+        });
+
+        // Lightbox functionality
+        let currentIndex = 0;
+        let slideshowInterval = null;
+        let isSlideshow = false;
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const slideshowBtn = document.getElementById('slideshow-btn');
+
+        function openLightbox(index) {
+            currentIndex = index;
+            lightboxImg.src = `images/${images[currentIndex]}`;
+            lightbox.style.display = 'flex';
+            if (isSlideshow) startSlideshow();
+        }
+
+        function closeLightbox() {
+            lightbox.style.display = 'none';
+            stopSlideshow();
+            isSlideshow = false;
+            slideshowBtn.textContent = 'Start Slideshow';
+        }
+
+        function nextImage() {
+            currentIndex = (currentIndex + 1) % images.length;
+            lightboxImg.src = `images/${images[currentIndex]}`;
+        }
+
+        function prevImage() {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            lightboxImg.src = `images/${images[currentIndex]}`;
+        }
+
+        function startSlideshow() {
+            if (slideshowInterval) clearInterval(slideshowInterval);
+            slideshowInterval = setInterval(nextImage, 3000); // Change image every 3 seconds
+        }
+
+        function stopSlideshow() {
+            if (slideshowInterval) {
+                clearInterval(slideshowInterval);
+                slideshowInterval = null;
+            }
+        }
+
+        slideshowBtn.addEventListener('click', () => {
+            if (isSlideshow) {
+                stopSlideshow();
+                isSlideshow = false;
+                slideshowBtn.textContent = 'Start Slideshow';
+            } else {
+                isSlideshow = true;
+                slideshowBtn.textContent = 'Stop Slideshow';
+                openLightbox(0); // Start from first image
+            }
+        });
+
+        document.querySelector('.close').addEventListener('click', closeLightbox);
+        document.querySelector('.next').addEventListener('click', nextImage);
+        document.querySelector('.prev').addEventListener('click', prevImage);
+
+        // Close on background click
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.style.display === 'flex') {
+                if (e.key === 'Escape') closeLightbox();
+                else if (e.key === 'ArrowRight') nextImage();
+                else if (e.key === 'ArrowLeft') prevImage();
+                else if (e.key === ' ') { // Spacebar to pause/play
+                    e.preventDefault();
+                    if (isSlideshow) {
+                        stopSlideshow();
+                    } else {
+                        startSlideshow();
+                    }
+                }
+            }
+        });
+    </script>
+</html>
